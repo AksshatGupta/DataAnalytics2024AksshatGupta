@@ -81,28 +81,30 @@ ggplot(subset_global_west, aes(x=ECO, y=BDH)) +
 region_subset1 <- subset(epi, region %in% c("Global West", "Asia-Pacific", "Eastern Europe"))
 region_subset1 <- region_subset1[, c("region", "ECO", "BDH", "TBN", "TKP", "AGR")]
 
-set.seed(123)
-n <- nrow(region_subset1)
-train_indexes <- sample(n, n * 0.7)
+accuracy_region_subset1 <- numeric(9)
+ks <- seq(2, 10, 1)
 
-train_data1 <- region_subset1[train_indexes, ]
-test_data1 <- region_subset1[-train_indexes, ]
+for (k in ks) {
+  n <- nrow(region_subset1)
+  train_indexes <- sample(n, n * 0.7)
+  
+  train_data1 <- region_subset1[train_indexes, ]
+  test_data1 <- region_subset1[-train_indexes, ]
+  
+  train_x1 <- train_data1[, -1]
+  train_y1 <- train_data1$region
+  test_x1 <- test_data1[, -1]
+  test_y1 <- test_data1$region
+  
+  KNNpred1 <- knn(train = train_x1, test = test_x1, cl = train_y1, k = 5)
+  contingency_table1 <- table(Predicted = KNNpred1, Actual = test_y1)
+  
+  contingency_matrix1 <- as.matrix(contingency_table1)
+  accuracy_region_subset1[k-1] <- sum(diag(contingency_matrix1)) / length(test_y1)
+}
 
-k <- 5
-
-train_x1 <- train_data1[, -1]
-train_y1 <- train_data1$region
-test_x1 <- test_data1[, -1]
-test_y1 <- test_data1$region
-
-KNNpred1 <- knn(train = train_x1, test = test_x1, cl = train_y1, k = k)
-
-contingency_table1 <- table(Predicted = KNNpred1, Actual = test_y1)
-print(contingency_table1)
-
-contingency_matrix1 <- as.matrix(contingency_table1)
-accuracy1 <- sum(diag(contingency_matrix1)) / length(test_y1)
-print(paste("Accuracy of kNN Model 1:", accuracy1))
+average_accuracy_region_subset1 <- mean(accuracy_region_subset1)
+print(paste("Average Accuracy of kNN Model 1:", average_accuracy_region_subset1))
 
 # 3.2. Repeat the previous model with the same variables for another set of 3
 # other regions and evaluate. In 1-2 sentences explain which model is better 
@@ -111,29 +113,33 @@ print(paste("Accuracy of kNN Model 1:", accuracy1))
 region_subset2 <- subset(epi, region %in% c("Greater Middle East", "Latin America & Caribbean", "Sub-Saharan Africa"))
 region_subset2 <- region_subset2[, c("region", "ECO", "BDH", "TBN", "TKP", "AGR")]
 
-set.seed(123)
-n <- nrow(region_subset2)
-train_indexes <- sample(n, n * 0.7)
+accuracy_region_subset2 <- numeric(9)
+ks <- seq(2, 10, 1)
 
-train_data2 <- region_subset2[train_indexes, ]
-test_data2 <- region_subset2[-train_indexes, ]
+for (k in ks) {
+  n <- nrow(region_subset2)
+  train_indexes <- sample(n, n * 0.7)
+  
+  train_data2 <- region_subset2[train_indexes, ]
+  test_data2 <- region_subset2[-train_indexes, ]
+  
+  train_x2 <- train_data2[, -1]
+  train_y2 <- train_data2$region
+  test_x2 <- test_data2[, -1]
+  test_y2 <- test_data2$region
+  
+  KNNpred2 <- knn(train = train_x2, test = test_x2, cl = train_y2, k)
+  contingency_table2 <- table(Predicted = KNNpred2, Actual = test_y2)
 
-train_x2 <- train_data2[, -1]
-train_y2 <- train_data2$region
-test_x2 <- test_data2[, -1]
-test_y2 <- test_data2$region
+  contingency_matrix2 <- as.matrix(contingency_table2)
+  accuracy_region_subset2[k-1] <- sum(diag(contingency_matrix1)) / length(test_y1)
+}
 
-KNNpred2 <- knn(train = train_x2, test = test_x2, cl = train_y2, k = k)
+average_accuracy_region_subset2 <- mean(accuracy_region_subset2)
+print(paste("Average Accuracy of kNN Model 2:", average_accuracy_region_subset2))
 
-contingency_table2 <- table(Predicted = KNNpred2, Actual = test_y2)
-print(contingency_table2)
-
-contingency_matrix2 <- as.matrix(contingency_table2)
-accuracy2 <- sum(diag(contingency_matrix2)) / length(test_y2)
-print(paste("Accuracy of kNN Model 2:", accuracy2))
-
-# Model 1 is better as it has an accuracy of 0.7, where as model 2 has an 
-# accuracy of 0.4138.
+# Model 1 is better as it has an average accuracy of 0.66, where as model 2 
+# has an average accuracy of 0.5.
 
 
 
@@ -181,6 +187,6 @@ lines(ks, wcss_subset2, type = "b", col = "red")
 legend("topright", legend = c("subset 1", "subset 2"), col = c("blue", "red"), lty = 1)
 
 
-# Since subset 1 has a lower WCSS, menaing that clusters in subset 1 less 
+# Since subset 1 has a lower WCSS, meaning that clusters in subset 1 less 
 # variation and are more compact, it is better than subset 2.
 
